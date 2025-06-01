@@ -3,7 +3,7 @@ import sys
 from fisica import Fisica
 
 pygame.init()
-
+#nada
 largura = 800
 altura = 600
 tela = pygame.display.set_mode((largura, altura))
