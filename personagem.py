@@ -2,6 +2,7 @@ import pygame
 import sys
 from fisica import Fisica
 from carregar_sprites import Sprites
+from estado_animacoes import Estados
 pygame.init()
 #nada
 largura = 800
@@ -14,19 +15,9 @@ class Personagem(pygame.sprite.Sprite, Fisica):
     def __init__(self, nome: str, listar: list, x: int, y: int):
         super().__init__()
         self.__fisica = Fisica()
+        self.__estados = Estados()
         self.__spritess = Sprites(nome, listar)
         self.__spritess.addsprites()
-        self.__estados = {
-            'parado': True,
-            'andando': False,
-            'pulando': False,
-            'soco': False,
-            'chute': False,
-            'defesa': False,
-            'atingido': False,
-            'chutepulo': False,
-            'flip': False
-        }
         self.__vida = 100
         self.__retangulo = pygame.Rect(x, y, 150, 150)
         self.__flip = False
@@ -34,6 +25,10 @@ class Personagem(pygame.sprite.Sprite, Fisica):
     @property
     def vida(self):
         return self.__vida
+    
+    @property
+    def estados(self):
+        return self.__estados
     
     @property
     def estados(self):
@@ -82,55 +77,57 @@ class Personagem(pygame.sprite.Sprite, Fisica):
         self.__flip = val
         
     @estados.setter
-    def estados(self, novo: dict):
-        for i, val in novo.items():
-            self.__estados[i] = val
+    def estados(self, val: Estados):
+        self.__estados = val
+            
+    
     
     def actions(self, altura, largura, tela, alvo, op: int):
         teclas = pygame.key.get_pressed()
         
-        andando = False
-        atacando = False
-        
         if op == 1:
             if teclas[pygame.K_LEFT]:
                 self.retangulo.x -= 5
-                andando = True
+                self.estados.andando = True
                 if self.retangulo.x < 0:
                     self.retangulo.x = 0
 
             if teclas[pygame.K_RIGHT]:
                 self.retangulo.x += 5
-                self.andando = True
+                self.estados.andando = True
                 if self.retangulo.right > largura:
                     self.retangulo.right = largura
                     
             if teclas[pygame.K_t]:
                 self.attack(tela, alvo)
-                atacando = True   
+                self.estados.soco = True
 
             if teclas[pygame.K_UP] and not self.fisica.no_ar and self.retangulo.y == altura - self.retangulo.height:
+                self.estados.pulando = True
                 self.fisica.iniciar_pulo()
 
         if op == 2:
             if teclas[pygame.K_a]:
                 self.retangulo.x -= 5
-                andando = True
+                self.estados.andando = True
                 if self.retangulo.x < 0:
                     self.retangulo.x = 0
 
             if teclas[pygame.K_d]:
                 self.retangulo.x += 5
-                andando = True
+                self.estados.andando = True
                 if self.retangulo.right > largura:
                     self.retangulo.right = largura
 
             if teclas[pygame.K_w] and not self.fisica.pulo and self.retangulo.y == altura - self.retangulo.height:
                 self.fisica.iniciar_pulo()
+                self.estados.pulando = True
 
             if teclas[pygame.K_f]:
                 self.attack(tela, alvo)
-                atacando = True
+                self.estados.soco = True
+            if teclas[pygame.K_k]:
+                self.estados.defesa = True
 
         if alvo.retangulo.centerx > self.retangulo.centerx:
             self.flip = False
@@ -138,27 +135,36 @@ class Personagem(pygame.sprite.Sprite, Fisica):
             self.flip = True
 
         self.retangulo.y = self.fisica.aplicar_gravidade(self.retangulo.y, altura - self.retangulo.height)
-
-        self.atualizar_animacao(tela, andando, atacando)
         
-    def atualizar_animacao(self, superficie, andando, atacando):
-        if self.fisica.pulo:
+        self.atualizar_animacao(tela)
+        self.estados.resetar_estados()
+        
+    def atualizar_animacao(self, superficie):
+        if self.estados.pulando:
             self.desenhar(superficie, 2)
-        elif atacando:
+        elif self.estados.soco:
             self.desenhar(superficie, 3)
-        elif andando:
+        elif self.estados.defesa:
+            self.desenhar(superficie, 5)
+        elif self.estados.andando:
             self.desenhar(superficie, 1)
         else:
             self.desenhar(superficie, 0) 
 
     
     def attack(self, superficie, alvo):
+        alcance = 5
         if self.flip:
-            attacking_rect = pygame.Rect(self.retangulo.left - self.retangulo.width, self.retangulo.top, self.retangulo.width, self.retangulo.height)
+            attacking_rect = pygame.Rect(self.retangulo.left, self.retangulo.top, alcance, self.retangulo.height)
         else:
-            attacking_rect = pygame.Rect(self.retangulo.right, self.retangulo.top, self.retangulo.width, self.retangulo.height)
+            attacking_rect = pygame.Rect(self.retangulo.right, self.retangulo.top, alcance, self.retangulo.height)
+        pygame.draw.rect(tela, (255, 255, 255), attacking_rect)
         if attacking_rect.colliderect(alvo.retangulo):
-            alvo.vida -= 10
+            if alvo.estados.defesa:
+                alvo.vida -= 0.5
+            else:
+                alvo.vida -= 10
+            
          
     def barra_vida(self, vida, x, y):
         razao = vida / 100
