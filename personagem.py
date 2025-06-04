@@ -54,12 +54,6 @@ class Personagem(pygame.sprite.Sprite, Fisica):
             if teclas[pygame.K_UP] and not self.fisica.pulo and self.retangulo.y == altura - self.retangulo.height:
                 self.fisica.iniciar_pulo()
 
-            for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_r:
-                        self.attack(tela, alvo)
-                        atacando = True
-
         if op == 2:
             if teclas[pygame.K_a]:
                 self.retangulo.x -= 5
