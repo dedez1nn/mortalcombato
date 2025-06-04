@@ -1,6 +1,7 @@
 import pygame
 import sys
 from fisica import Fisica
+from carregar_sprites import Sprites
 pygame.init()
 #nada
 largura = 800
@@ -10,12 +11,14 @@ tela = pygame.display.set_mode((largura, altura))
 pygame.display.set_caption("pescocoviado")
 
 class Personagem(pygame.sprite.Sprite, Fisica):
-    def __init__(self, x: int, y: int):
+    def __init__(self, nome: str, listar: list, x: int, y: int):
         super().__init__()
         self.fisica = Fisica()
+        self.spritess = Sprites(nome, listar)
+        self.spritess.addsprites()
         self.__vida = 100
-        self.retangulo = pygame.Rect(x, y, 50, 50)
-        self.flip = 0
+        self.retangulo = pygame.Rect(x, y, 150, 150)
+        self.flip = False
     
     @property
     def vida(self):
@@ -35,24 +38,33 @@ class Personagem(pygame.sprite.Sprite, Fisica):
         if op == 1:
             if teclas[pygame.K_LEFT]:
                 self.retangulo.x -= 5
+                self.desenhar(tela, 1)
                 if self.retangulo.x < 0:
                    self.retangulo.x = 0
 
-            if teclas[pygame.K_RIGHT]:
+            elif teclas[pygame.K_RIGHT]:
                 self.retangulo.x += 5
-                if self.retangulo.x > largura - self.retangulo.width:
-                    self.retangulo.x = largura - self.retangulo.width
+                self.desenhar(tela, 1)
+                if self.retangulo.right > largura:
+                    self.retangulo.right = largura
 
-            if teclas[pygame.K_UP] and not self.fisica.pulo and self.retangulo.y == altura - self.retangulo.height:
+            elif teclas[pygame.K_UP] and not self.fisica.pulo and self.retangulo.y == altura - self.retangulo.height:
                 self.fisica.iniciar_pulo()
+                self.desenhar(tela, 2)
 
-            if teclas[pygame.K_r]:
+            elif teclas[pygame.K_r]:
                 self.attack(tela, alvo)
+                self.desenhar(tela, 3)
+                
+            else:
+                self.desenhar(tela, 0)
                 
             if alvo.retangulo.centerx > self.retangulo.centerx:
-                self.flip = 1
+                self.flip = False
             else:
-                self.flip = 0
+                self.flip = True
+                
+                
                 
 
             self.retangulo.y = self.fisica.aplicar_gravidade(self.retangulo.y, altura - self.retangulo.height)
@@ -60,33 +72,53 @@ class Personagem(pygame.sprite.Sprite, Fisica):
         if op == 2:
             if teclas[pygame.K_a]:
                 self.retangulo.x -= 5
+                self.desenhar(tela, 1)
                 if self.retangulo.x < 0:
                     self.retangulo.x = 0
 
-            if teclas[pygame.K_d]:
+            elif teclas[pygame.K_d]:
                 self.retangulo.x += 5
-                if self.retangulo.x > largura - self.retangulo.width:
-                    self.retangulo.x = largura - self.retangulo.width
+                self.desenhar(tela, 1)
+                if self.retangulo.right > largura:
+                    self.retangulo.right = largura
 
-            if teclas[pygame.K_w] and not self.fisica.pulo and self.retangulo.y == altura - self.retangulo.height:
+            elif teclas[pygame.K_w] and not self.fisica.pulo and self.retangulo.y == altura - self.retangulo.height:
                 self.fisica.iniciar_pulo()
+                self.desenhar(tela, 2)
 
-            if teclas[pygame.K_f]:
+            elif teclas[pygame.K_f]: 
                 self.attack(tela, alvo)
+                self.desenhar(tela, 3)
+            else:
+                self.desenhar(tela, 0)
+                
                 
             if alvo.retangulo.centerx > self.retangulo.centerx:
-                self.flip = 0
+                self.flip = False
             else:
-                self.flip = 1
+                self.flip = True
 
             self.retangulo.y = self.fisica.aplicar_gravidade(self.retangulo.y, altura - self.retangulo.height)
     
     def attack(self, superficie, alvo):
-        attacking_rect = pygame.Rect(self.retangulo.centerx - (2 *  self.retangulo.width * self.flip), self.retangulo.y, 2 * self.retangulo.width, self.retangulo.height)
+        if self.flip:
+            attacking_rect = pygame.Rect(
+                self.retangulo.left - self.retangulo.width,  # ataque para trás
+                self.retangulo.top,
+                self.retangulo.width,
+                self.retangulo.height
+            )
+        else:
+            attacking_rect = pygame.Rect(
+                self.retangulo.right,  # ataque para frente
+                self.retangulo.top,
+                self.retangulo.width,
+                self.retangulo.height
+            )
         if attacking_rect.colliderect(alvo.retangulo):
-            alvo.vida -= 10 
+            alvo.vida -= 10
          
-        
+        #171x212
     def barra_vida(self, vida, x, y):
         razao = vida / 100
         pygame.draw.rect(tela, (255, 255, 255), (x - 2, y - 2, 304, 34))
@@ -94,12 +126,14 @@ class Personagem(pygame.sprite.Sprite, Fisica):
         pygame.draw.rect(tela, (0, 255, 0), (x, y, 300 * razao, 31))
         
         
-    def desenhar(self, superficie):
-        pygame.draw.rect(superficie, (255, 0, 0), self.retangulo)
+    def desenhar(self, superficie, indice: int):
+        imagem = self.spritess.percorrer(indice)
+        imagem_flipada = pygame.transform.flip(imagem, self.flip, False)
+        superficie.blit(imagem_flipada, self.retangulo)
 
 run = True
-player = Personagem(100, altura - 50)
-player2 = Personagem(500, altura - 50)
+player = Personagem("cris_tonaldo", [3, 3, 4, 3, 4, 1, 8, 3], 10, altura - 150)
+player2 = Personagem("cris_tonaldo", [3, 3, 4, 3, 4, 1, 8, 3], 400, altura - 150)
 clock = pygame.time.Clock()
 
 while run:
@@ -113,10 +147,8 @@ while run:
 
     tela.fill((0, 0, 0))
     player.actions(altura, largura, tela, player2, 1)      
-    player.desenhar(tela)
     player.barra_vida(player.vida, 10, 20)
     player2.actions(altura, largura, tela, player, 2)    
-    player2.desenhar(tela)     
     player.barra_vida(player2.vida, 490, 20)
     pygame.display.flip() 
             
