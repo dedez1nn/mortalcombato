@@ -34,71 +34,78 @@ class Personagem(pygame.sprite.Sprite, Fisica):
     def actions(self, altura, largura, tela, alvo, op: int):
         teclas = pygame.key.get_pressed()
 
-        
+        andando = False
+        atacando = False
+        no_ar = False
+
         if op == 1:
             if teclas[pygame.K_LEFT]:
                 self.retangulo.x -= 5
-                self.desenhar(tela, 1)
-                if self.retangulo.x < 0:
-                   self.retangulo.x = 0
-
-            elif teclas[pygame.K_RIGHT]:
-                self.retangulo.x += 5
-                self.desenhar(tela, 1)
-                if self.retangulo.right > largura:
-                    self.retangulo.right = largura
-
-            elif teclas[pygame.K_UP] and not self.fisica.pulo and self.retangulo.y == altura - self.retangulo.height:
-                self.fisica.iniciar_pulo()
-                self.desenhar(tela, 2)
-
-            elif teclas[pygame.K_r]:
-                self.attack(tela, alvo)
-                self.desenhar(tela, 3)
-                
-            else:
-                self.desenhar(tela, 0)
-                
-            if alvo.retangulo.centerx > self.retangulo.centerx:
-                self.flip = False
-            else:
-                self.flip = True
-                
-                
-                
-
-            self.retangulo.y = self.fisica.aplicar_gravidade(self.retangulo.y, altura - self.retangulo.height)
-        
-        if op == 2:
-            if teclas[pygame.K_a]:
-                self.retangulo.x -= 5
-                self.desenhar(tela, 1)
+                andando = True
                 if self.retangulo.x < 0:
                     self.retangulo.x = 0
 
-            elif teclas[pygame.K_d]:
+            if teclas[pygame.K_RIGHT]:
                 self.retangulo.x += 5
-                self.desenhar(tela, 1)
+                andando = True
                 if self.retangulo.right > largura:
                     self.retangulo.right = largura
 
-            elif teclas[pygame.K_w] and not self.fisica.pulo and self.retangulo.y == altura - self.retangulo.height:
+            if teclas[pygame.K_UP] and not self.fisica.pulo and self.retangulo.y == altura - self.retangulo.height:
                 self.fisica.iniciar_pulo()
-                self.desenhar(tela, 2)
 
-            elif teclas[pygame.K_f]: 
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_r:
+                        self.attack(tela, alvo)
+                        atacando = True
+
+        if op == 2:
+            if teclas[pygame.K_a]:
+                self.retangulo.x -= 5
+                andando = True
+                if self.retangulo.x < 0:
+                    self.retangulo.x = 0
+
+            if teclas[pygame.K_d]:
+                self.retangulo.x += 5
+                andando = True
+                if self.retangulo.right > largura:
+                    self.retangulo.right = largura
+
+            if teclas[pygame.K_w] and not self.fisica.pulo and self.retangulo.y == altura - self.retangulo.height:
+                self.fisica.iniciar_pulo()
+
+
+
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_:
+                        self.attack(tela, alvo)
+                        atacando = True
+            if teclas[pygame.K_f]:
                 self.attack(tela, alvo)
-                self.desenhar(tela, 3)
-            else:
-                self.desenhar(tela, 0)
-                
-                
-            if alvo.retangulo.centerx > self.retangulo.centerx:
-                self.flip = False
-            else:
-                self.flip = True
+                atacando = True
 
-            self.retangulo.y = self.fisica.aplicar_gravidade(self.retangulo.y, altura - self.retangulo.height)
+        if alvo.retangulo.centerx > self.retangulo.centerx:
+            self.flip = False
+        else:
+            self.flip = True
+
+        self.retangulo.y = self.fisica.aplicar_gravidade(self.retangulo.y, altura - self.retangulo.height)
+
+        self.atualizar_animacao(tela, andando, atacando)
+        
+    def atualizar_animacao(self, superficie, andando, atacando):
+        if self.fisica.pulo:
+            self.desenhar(superficie, 2)
+        elif atacando:
+            self.desenhar(superficie, 3)
+        elif andando:
+            self.desenhar(superficie, 1)
+        else:
+            self.desenhar(superficie, 0) 
+
     
     def attack(self, superficie, alvo):
         if self.flip:
