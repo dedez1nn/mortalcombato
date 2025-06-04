@@ -5,7 +5,7 @@ class Fisica:
         self.__vel_y = 0
         self.__gravidade = 1
         self.__altura_pulo = 20
-        self.__pulo = False
+        self.__no_ar = False
         self.__velocidade = 5
 
     @property
@@ -17,12 +17,12 @@ class Fisica:
         self.__velocidade = val
         
     @property
-    def pulo(self):
-        return self.__pulo
+    def no_ar(self):
+        return self.__no_ar
 
-    @pulo.setter
+    @no_ar.setter
     def pulo(self, valor: bool):
-        self.__pulo = valor
+        self.__no_ar = valor
 
     @property
     def vel_y(self):
@@ -49,18 +49,19 @@ class Fisica:
         self.__altura_pulo = valor
 
     def aplicar_gravidade(self, y, limite_chao):
-        if self.__pulo:
+        if self.__no_ar:
             y += self.vel_y
             self.vel_y += self.gravidade
 
             if y >= limite_chao:
                 y = limite_chao
-                self.__pulo = False
+                self.__no_ar = False
                 self.__vel_y = 0
 
         return y
 
     def iniciar_pulo(self):
-        self.__pulo = True
+        self.__no_ar = True
         self.__vel_y = -self.__altura_pulo
+            
             
