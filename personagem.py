@@ -13,16 +13,47 @@ pygame.display.set_caption("pescocoviado")
 class Personagem(pygame.sprite.Sprite, Fisica):
     def __init__(self, nome: str, listar: list, x: int, y: int):
         super().__init__()
-        self.fisica = Fisica()
-        self.spritess = Sprites(nome, listar)
-        self.spritess.addsprites()
+        self.__fisica = Fisica()
+        self.__spritess = Sprites(nome, listar)
+        self.__spritess.addsprites()
+        self.__estados = {
+            'parado': True,
+            'andando': False,
+            'pulando': False,
+            'soco': False,
+            'chute': False,
+            'defesa': False,
+            'atingido': False,
+            'chutepulo': False,
+            'flip': False
+        }
         self.__vida = 100
-        self.retangulo = pygame.Rect(x, y, 150, 150)
-        self.flip = False
+        self.__retangulo = pygame.Rect(x, y, 150, 150)
+        self.__flip = False
     
     @property
     def vida(self):
         return self.__vida
+    
+    @property
+    def estados(self):
+        return self.__estados
+    
+    @property
+    def fisica(self):
+        return self.__fisica
+    
+    @property
+    def flip(self):
+        return self.__flip
+    
+    @property
+    def spritess(self):
+        return self.__spritess
+    
+    @property
+    def retangulo(self):
+        return self.__retangulo
     
     @vida.setter
     def vida(self, val:int):
@@ -30,14 +61,37 @@ class Personagem(pygame.sprite.Sprite, Fisica):
             self.__vida = 0
         else:
             self.__vida = val
+            
+    @retangulo.setter
+    def retangulo(self, x: int, y: int, wid: int, hei: int):
+        if x < 0 or y < 0 or wid < 0 or hei < 0:
+            raise Exception("Erro, valor ou valores invalido(s)!")
+        else:
+            self.__retangulo = pygame.Rect(x, y, wid, hei)
+        
+    @fisica.setter
+    def fisica(self, val: Fisica):
+        self.__fisica = val
+        
+    @spritess.setter
+    def spritess(self, val: Sprites):
+        self.__spritess = val
+        
+    @flip.setter
+    def flip(self, val: bool):
+        self.__flip = val
+        
+    @estados.setter
+    def estados(self, novo: dict):
+        for i, val in novo.items():
+            self.__estados[i] = val
     
     def actions(self, altura, largura, tela, alvo, op: int):
         teclas = pygame.key.get_pressed()
-
+        
         andando = False
         atacando = False
-        no_ar = False
-
+        
         if op == 1:
             if teclas[pygame.K_LEFT]:
                 self.retangulo.x -= 5
@@ -47,11 +101,15 @@ class Personagem(pygame.sprite.Sprite, Fisica):
 
             if teclas[pygame.K_RIGHT]:
                 self.retangulo.x += 5
-                andando = True
+                self.andando = True
                 if self.retangulo.right > largura:
                     self.retangulo.right = largura
+                    
+            if teclas[pygame.K_t]:
+                self.attack(tela, alvo)
+                atacando = True   
 
-            if teclas[pygame.K_UP] and not self.fisica.pulo and self.retangulo.y == altura - self.retangulo.height:
+            if teclas[pygame.K_UP] and not self.fisica.no_ar and self.retangulo.y == altura - self.retangulo.height:
                 self.fisica.iniciar_pulo()
 
         if op == 2:
@@ -70,13 +128,6 @@ class Personagem(pygame.sprite.Sprite, Fisica):
             if teclas[pygame.K_w] and not self.fisica.pulo and self.retangulo.y == altura - self.retangulo.height:
                 self.fisica.iniciar_pulo()
 
-
-
-            for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_:
-                        self.attack(tela, alvo)
-                        atacando = True
             if teclas[pygame.K_f]:
                 self.attack(tela, alvo)
                 atacando = True
@@ -103,23 +154,12 @@ class Personagem(pygame.sprite.Sprite, Fisica):
     
     def attack(self, superficie, alvo):
         if self.flip:
-            attacking_rect = pygame.Rect(
-                self.retangulo.left - self.retangulo.width,  # ataque para trás
-                self.retangulo.top,
-                self.retangulo.width,
-                self.retangulo.height
-            )
+            attacking_rect = pygame.Rect(self.retangulo.left - self.retangulo.width, self.retangulo.top, self.retangulo.width, self.retangulo.height)
         else:
-            attacking_rect = pygame.Rect(
-                self.retangulo.right,  # ataque para frente
-                self.retangulo.top,
-                self.retangulo.width,
-                self.retangulo.height
-            )
+            attacking_rect = pygame.Rect(self.retangulo.right, self.retangulo.top, self.retangulo.width, self.retangulo.height)
         if attacking_rect.colliderect(alvo.retangulo):
             alvo.vida -= 10
          
-        #171x212
     def barra_vida(self, vida, x, y):
         razao = vida / 100
         pygame.draw.rect(tela, (255, 255, 255), (x - 2, y - 2, 304, 34))
