@@ -1,4 +1,5 @@
 import pygame
+from estado_animacoes import Estados
 
 class Fisica:
     def __init__(self):
@@ -7,6 +8,7 @@ class Fisica:
         self.__altura_pulo = 20
         self.__no_ar = False
         self.__velocidade = 5
+        self.__estadopulo = Estados()
 
     @property
     def velocidade(self):
@@ -27,6 +29,10 @@ class Fisica:
     @property
     def vel_y(self):
         return self.__vel_y
+    
+    @property
+    def estados(self):
+        return self.__estadopulo
 
     @vel_y.setter
     def vel_y(self, valor: float):
@@ -47,6 +53,10 @@ class Fisica:
     @altura_pulo.setter
     def altura_pulo(self, valor: float):
         self.__altura_pulo = valor
+        
+    @estados.setter
+    def estados(self, val: Estados):
+        self.__estadopulo = val
 
     def aplicar_gravidade(self, y, limite_chao):
         if self.__no_ar:
@@ -57,9 +67,14 @@ class Fisica:
                 y = limite_chao
                 self.__no_ar = False
                 self.__vel_y = 0
+                
 
         return y
 
+    def iniciar_pulo(self):
+        self.__no_ar = True
+        self.__vel_y = -self.__altura_pulo
+            
     def iniciar_pulo(self):
         self.__no_ar = True
         self.__vel_y = -self.__altura_pulo
