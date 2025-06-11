@@ -14,8 +14,24 @@ class Jogador(PersonagemBase):
     def actions(self, superficie, altura, largura, alvo):
         teclas = pygame.key.get_pressed()
         
+        
+        
+        if self.retangulo.centerx > alvo.retangulo.centerx:
+            self.flip = True
+            deslocamento = 5
+        else:
+            self.flip = False
+            deslocamento = -5
+            
+        if self.estados.atingido:
+            self.retangulo.x += deslocamento
+            
+        if self.retangulo.x <= 0:
+            self.retangulo.x = 0
+        elif self.retangulo.right >= largura:
+            self.retangulo.right = largura
         #movimentos player 1
-        if not self.estados.atingido or not self.estados.soco or not self.estados.defesa:
+        if not self.estados.atingido and not self.estados.soco and not self.estados.defesa:
                 if teclas[pygame.K_a]:
                     nova_x = self.retangulo.x - 5
                     ret_temp = self.retangulo.copy()
@@ -39,16 +55,12 @@ class Jogador(PersonagemBase):
                 if not teclas[pygame.K_k]:
                     if teclas[pygame.K_f]:
                         self.estados.soco = True
+                        
+                    if teclas[pygame.K_t] and self.especial >= 100:
+                        self.estados.special = True
                 if teclas[pygame.K_k]:
                     self.estados.defesa = True
-                else:
-                    self.estados.defesa = False
-                    
         #garantir um player sempre olhar para o outro
-        if alvo.retangulo.centerx > self.retangulo.centerx:
-            self.flip = False
-        else:
-            self.flip = True
             
         #adicionar um cooldown
         if self.ataquecdr > 0:
@@ -60,8 +72,9 @@ class Jogador(PersonagemBase):
         #resetar o estado de pulo
         if self.retangulo.y == altura - self.retangulo.height:
             self.estados.pulando = False
-        
+            
         
         #desenhar as animacoes na tela com base nos estados
-        self.atualizar_animacao(superficie, alvo)
+        self.atualizar_animacao(superficie, alvo, 50) #tela, inimigo e cdr ataque
         self.estados.resetar_estados()  
+        
