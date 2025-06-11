@@ -6,12 +6,13 @@ from carregar_sprites import Sprites
 from estado_animacoes import Estados
 from carregar_sprites import Sprites
 from jogador import Jogador
-from inimigo import Inimigo1
+from inimigo import Inimigo
+from fase import Fase
 
 
 def main():
     pygame.init()
-    #nada
+
 
     largura = 800
     altura = 600
@@ -22,9 +23,10 @@ def main():
 
 
     run = True
-    player = Jogador("cris_tonaldo", [3, 3, 4, 3, 4, 1, 8, 3], 10, altura - 150)
-    player2 = Inimigo1("cris_tonaldo", [3, 3, 4, 3, 4, 1, 8, 3], 400, altura - 150)
+    player = Jogador("cris_tonaldo", [3, 3, 4, 3, 4, 1, 8, 5], 10, altura - 150)
+    player2 = Inimigo("cris_tonaldo", [3, 3, 4, 3, 4, 1, 8, 5], 400, altura - 150)
     clock = pygame.time.Clock()
+    fase = Fase(player, player2)
 
     while run:
         clock.tick(60)
@@ -34,12 +36,12 @@ def main():
                 run = False
                 sys.exit()
                 
-
         tela.fill((0, 0, 0))
-        player.actions(tela, altura, largura, player2)      
+        fase.loopmain()
+        player.actions(tela, altura, largura, player2)
         #(self, superficie, vida, x, y)
         player.barra_vida(tela, player.vida, 10, 20)
-        player2.actions(tela, altura, largura, player)    
+        player2.actions(tela, altura, largura, player) 
         player2.barra_vida(tela, player2.vida, 490, 20)
         pygame.display.flip() 
                 
