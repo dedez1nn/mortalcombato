@@ -15,10 +15,9 @@ class Estados:
         self.__andando = False
         self.__pulando = False
         self.__soco = False
-        self.__chute = False
         self.__defesa = False
         self.__atingido = False
-        self.__chutepulo = False
+        self.__special = False
         
     @property
     def parado(self):
@@ -41,8 +40,8 @@ class Estados:
         return self.__atingido
     
     @property
-    def chutepulo(self):
-        return self.__chutepulo
+    def special(self):
+        return self.__special
     
     @property
     def defesa(self):
@@ -73,7 +72,20 @@ class Estados:
     @pulando.setter
     def pulando(self, val: bool):
         self.__pulando = val
+    
+    @special.setter
+    def special(self, val: bool):
+        self.__special = val
         
     def resetar_estados(self):
         self.parado = True
         self.andando = False
+        
+    def resetar_todos(self):
+        self.__parado = True
+        self.__andando = False
+        self.__pulando = False
+        self.__soco = False
+        self.__defesa = False
+        self.__atingido = False
+        self.__special = False
