@@ -54,29 +54,24 @@ class Fisica:
     def altura_pulo(self, valor: float):
         self.__altura_pulo = valor
         
-    @estados.setter
-    def estados(self, val: Estados):
-        self.__estadopulo = val
 
     def aplicar_gravidade(self, y, limite_chao):
-        if self.__no_ar:
+        if self.no_ar:
             y += self.vel_y
             self.vel_y += self.gravidade
 
             if y >= limite_chao:
                 y = limite_chao
-                self.__no_ar = False
-                self.__vel_y = 0
+                self.no_ar = False
+                self.vel_y = 0
                 
 
         return y
 
     def iniciar_pulo(self):
-        self.__no_ar = True
-        self.__vel_y = -self.__altura_pulo
-            
-    def iniciar_pulo(self):
-        self.__no_ar = True
-        self.__vel_y = -self.__altura_pulo
-            
+            self.__no_ar = True
+            if self.no_ar:
+                self.vel_y = -self.altura_pulo
+            else:
+                self.vel_y = 0
             
