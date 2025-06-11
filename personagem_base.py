@@ -13,7 +13,7 @@ class PersonagemBase:
         self.__especial = 0
         self.__retangulo = pygame.Rect(x, y, 150, 150)
         self.__flip = False
-        self.__ataquecdr = 0
+        self.__ataquecdr = 0    
         
     @property
     def vida(self):
@@ -80,45 +80,51 @@ class PersonagemBase:
         self.__ataquecdr = val
     
         
-    def attack(self, alvo):
+    def attack(self, superficie, alvo, op):
         alcance = 10
-        if self.ataquecdr == 0 and not alvo.estados.atingido and self.spritess.sprite_fim != -1:
-            if self.flip:
-                attacking_rect = pygame.Rect(self.retangulo.left - alcance, self.retangulo.top, alcance, self.retangulo.height)
-            else:
-                attacking_rect = pygame.Rect(self.retangulo.right, self.retangulo.top, alcance, self.retangulo.height)
-                
+        if self.flip:
+            attacking_rect = pygame.Rect(self.retangulo.left, self.retangulo.top, alcance, self.retangulo.height)
+        else:
+            attacking_rect = pygame.Rect(self.retangulo.right, self.retangulo.top, alcance, self.retangulo.height)
+            
+        if self.ataquecdr == 0 and not alvo.estados.atingido and self.spritess.sprite_fim != -1 and op == 0:     
             if attacking_rect.colliderect(alvo.retangulo):
                 if alvo.estados.defesa:
                     alvo.vida -= 0.5
-                    alvo.retangulo.x += 2
-                    self.retangulo.x -= 2
                 else:
-                    if not alvo.estados.soco: #não tomar dano se tiver na animação
                         pygame.time.delay(10)
                         alvo.vida -= 5
                         alvo.estados.atingido = True
-            self.retangulo.x -= self.fisica.velocidade
-            print("Atacou")
+                        if self.especial <= 90:
+                            self.especial += 10
+                        else:
+                            self.especial = 100
+        elif op == 1 and self.especial >= 100:
+            if attacking_rect.colliderect(alvo.retangulo):
+                if not alvo.estados.defesa:
+                    alvo.vida -= 30
+                    alvo.estados.atingido = True
+            self.especial = 0
                     
-    def atualizar_animacao(self, superficie, alvo):
+            
+                
+                    
+    def atualizar_animacao(self, superficie, alvo, cdr):
         vel = 0.2
         cooldown_time = 30
-        if self.estados.soco:
-                    if self.estados.pulando:
-                        self.desenhar(superficie, 7, 0.1)
-                        if self.spritess.sprite_fim == 1:
-                            self.attack(alvo)
-                            pygame.time.delay(cooldown_time)
-                            self.ataquecdr = 30
-                            self.estados.soco = False
-                    else:
-                        self.desenhar(superficie, 3, vel)
-                        if self.spritess.sprite_fim == 1:
-                            self.attack(alvo)
-                            pygame.time.delay(cooldown_time)
-                            self.ataquecdr = 30
-                            self.estados.soco = False
+        if self.estados.special and not self.especial < 100:
+            self.desenhar(superficie, 7, vel)
+            if self.spritess.sprite_fim == 1:
+                self.attack(superficie, alvo, 1)
+                pygame.time.delay(cooldown_time)
+                self.estados.special = False
+        elif self.estados.soco and self.ataquecdr == 0:
+            self.desenhar(superficie, 3, vel)
+            if self.spritess.sprite_fim == 1:
+                self.attack(superficie, alvo, 0)
+                pygame.time.delay(cooldown_time)
+                self.estados.soco = False
+                self.ataquecdr = cdr
         elif self.estados.pulando:
                 self.desenhar(superficie, 2, vel)
                 if self.spritess.sprite_fim == 1:
@@ -126,14 +132,13 @@ class PersonagemBase:
         elif self.estados.atingido:
                 self.desenhar(superficie, 6, vel)
                 if self.spritess.sprite_fim == 1:
-                    pygame.time.delay(cooldown_time + 50)
                     self.estados.atingido = False
         elif self.estados.defesa:
                 self.desenhar(superficie, 5, vel)
                 if self.spritess.sprite_fim == 1:
                     self.estados.defesa = False
                     pygame.time.delay(cooldown_time)
-        elif self.estados.andando:
+        elif self.estados.andando and not self.retangulo.colliderect(alvo.retangulo):
                 self.desenhar(superficie, 1, vel)
                 if self.spritess.sprite_fim == 1:
                     pygame.time.delay(cooldown_time)
@@ -150,9 +155,19 @@ class PersonagemBase:
         pygame.draw.rect(superficie, (255, 0, 0), (x, y, 300, 30))
         pygame.draw.rect(superficie, (0, 255, 0), (x, y, 300 * razao, 31))
         
+        esp_y = y + 40  # Posição Y da barra de especial
+        razao_esp = self.especial / 100
+        # Moldura do especial (fundo branco)
+        pygame.draw.rect(superficie, (255, 255, 255), (x - 2, esp_y - 2, 154, 24))
+        # Fundo do especial (cinza escuro)
+        pygame.draw.rect(superficie, (50, 50, 50), (x, esp_y, 150, 20))
+        # Especial atual (azul ou outra cor de sua escolha)
+        pygame.draw.rect(superficie, (0, 100, 255), (x, esp_y, 150 * razao_esp, 20))
+        
         
         
     def desenhar(self, superficie, indice: int, vel: float):
         imagem = self.spritess.percorrer(indice, vel)
         imagem_flipada = pygame.transform.flip(imagem, self.flip, False)
         superficie.blit(imagem_flipada, self.retangulo)
+
