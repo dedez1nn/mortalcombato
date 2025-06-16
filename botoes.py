@@ -1,29 +1,41 @@
 import pygame
+class Botao:
+    def __init__(self, x, y):
+        self.__posicao_botao = (x, y)
+        self.__titulo_renderizado = None  
+        self.__rect = None 
 
-PRETO = (0, 0, 0)
-VERMELHO = (255, 0, 0)
-AMARELO = (255, 255, 0)
-
-class BotaoTexto:
-    def __init__(self, texto, pos, fonte, destaque=True):
-        self.texto = texto
-        self.pos = pos
-        self.fonte = fonte
-        self.destaque = destaque
-        self.rect = self.fonte.render(texto, True, (0, 0, 0)).get_rect(center=pos)
-
-    def desenhar(self, tela, mouse_pos):
-        if not self.destaque:
-            cor = PRETO
-        elif self.rect.collidepoint(mouse_pos):
-            cor = VERMELHO
-        else:
-            cor = AMARELO
-
-        render = self.fonte.render(self.texto, True, cor)
-        tela.blit(render, self.rect)
-
-    def clicado(self, mouse_pos, mouse_clique):
-        return self.rect.collidepoint(mouse_pos) and mouse_clique[0]
+    @property
+    def rect(self):
+        return self.__rect
     
+    @rect.setter
+    def rect(self, valor):
+        self.__rect = valor
+
+    @property
+    def posicao_botao(self):
+        return self.__posicao_botao
     
+    @posicao_botao.setter
+    def posicao_botao(self, posicao):
+        self.__posicao_botao = posicao
+    # Getter para titulo_renderizado
+    @property
+    def titulo_renderizado(self):        
+        return self.__titulo_renderizado
+
+    # Setter para titulo_renderizado
+    @titulo_renderizado.setter
+    def titulo_renderizado(self, valor):
+        self.__titulo_renderizado = valor
+
+    def titulo_botao(self, fonte, tamanho, texto, cor):
+        fonte_render = pygame.font.Font(fonte, tamanho)
+        self.titulo_renderizado = fonte_render.render(texto, True, cor)
+        self.rect = self.titulo_renderizado.get_rect(topleft=self.posicao_botao)
+
+    def desenha_botao(self, tela):
+        if self.titulo_renderizado:
+            tela.blit(self.titulo_renderizado, self.posicao_botao)
+            
