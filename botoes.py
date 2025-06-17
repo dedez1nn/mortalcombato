@@ -47,6 +47,7 @@ class Botao:
 import pygame
 from menu import Menu
 import sys
+from botoes import Botao
 
 def main():
     pygame.init()
@@ -57,14 +58,14 @@ def main():
     tela = menu.tela()
     fundo = menu.fundo_tela("fundo/1.png")  
     menu.titulo_menu("MKX Title.ttf", 50, "Mortal Kombat", (0, 0, 0))  
+    
     botao1 = Botao(300, 200)
-    botao1.titulo_botao("Arial.ttf", 30, "Jogar", (255, 255, 255))
+    botao1.titulo_botao("MKX Title.ttf", 30, "Jogar", (255, 255, 0))
 
     botao2 = Botao(300, 300)
-    botao2.titulo_botao("Arial.ttf", 30, "Sair", (255, 255, 25)
+    botao2.titulo_botao("MKX Title.ttf", 30, "Sair", (255, 255, 0))
     
     menu.botoes = [botao1, botao2] 
-
 
     run = True
     clock = pygame.time.Clock()
@@ -72,18 +73,23 @@ def main():
     while run:
         clock.tick(60)
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
                 run = False
+                pygame.quit()
                 sys.exit()
 
+            menu.acoes_menu(evento)  # Verifica o clique a cada evento
+            
         tela.blit(fundo, (0, 0))  
-        menu.desenha_titulo_menu(tela)  
+        menu.desenha_titulo_menu(tela)
+        for botao in menu.botoes:
+            botao.desenha_botao(tela)
 
-        pygame.display.flip()  
+        pygame.display.flip()  # Atualiza a tela
     
     pygame.quit()
 
 if __name__ == "__main__":
     main()
-            
+
