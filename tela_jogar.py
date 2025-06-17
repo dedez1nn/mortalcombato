@@ -13,6 +13,7 @@ class Tela_Jogar:
         self.__volume_mus = volume_mus
         self.__pause = False
         self.__fase = Fase(player, bot)
+        self.acabou = False
     
     @property
     def fase(self):
@@ -54,10 +55,6 @@ class Tela_Jogar:
     def fundo(self):
         return self.__fundo
     
-    @property
-    def volume(self):
-        return self.__volume
-    
     @player.setter
     def player(self, val: Jogador):
         self.__player = val
@@ -70,33 +67,44 @@ class Tela_Jogar:
     def fundo(self, val: str):
         self.__fundo = val
         
-    @volume.setter
-    def volume(self, val: int):
-        self.__volume = val
-        
     @pause.setter
     def pause(self, val: bool):
         self.__pause = val
 
     def tela_fighting(self, superficie, altura, largura, fonte, fundo):
-        superficie.blit(fundo, (0, 0))
-        texto_round = fonte.render(f"ROUND {self.fase.round}", True, (0, 0, 0))
-        superficie.blit(texto_round, (350, 20))
-        teclas = pygame.key.get_pressed()    
-        self.player.actions(superficie, altura, largura, self.bot)
-        self.bot.actions(superficie, altura, largura, self.player) 
-        self.player.barra_vida(superficie, 10, 20)
-        self.bot.barra_vida(superficie, 490, 20)
-        self.fase.loopmain()
-            
-        if teclas[pygame.K_p]:    
-            self.pause = True
-            self.pause = True
-            tela_congelada = superficie.copy()
-            self.pausa(superficie, fonte, fundo, tela_congelada)
-                
-            
-                    
+        rodando = True
+        clock = pygame.time.Clock()
+
+        while rodando and not self.acabou:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+            superficie.blit(fundo, (0, 0))
+            texto_round = fonte.render(f"ROUND {self.fase.round}", True, (0, 0, 0))
+            superficie.blit(texto_round, (350, 20))
+
+            teclas = pygame.key.get_pressed()
+            if teclas[pygame.K_p]:    
+                self.pause = True
+                tela_congelada = superficie.copy()
+                self.pausa(superficie, fonte, fundo, tela_congelada)
+
+            self.player.actions(superficie, altura, largura, self.bot)
+            self.bot.actions(superficie, altura, largura, self.player) 
+            self.player.barra_vida(superficie, 10, 20)
+            self.bot.barra_vida(superficie, 490, 20)
+
+            self.fase.loopmain()
+
+            if self.fase.ganhador != -1:
+                self.acabou = True
+                rodando = False
+
+            pygame.display.update()
+            clock.tick(60)  # 60 FPS para garantir que a tela será atualizada
+
     def pausa(self, superficie, fonte, fundo, tela_congelada):
         texto_bloco_3 = fonte.render("Continuar", True, (0, 0, 0))
         texto_bloco_2 = fonte.render("Configuracoes", True, (0, 0, 0))
@@ -190,4 +198,3 @@ class Tela_Jogar:
                 self.volume_mus = 100
             elif self.volume_mus <= 0:
                 self.volume_mus = 0
-        
