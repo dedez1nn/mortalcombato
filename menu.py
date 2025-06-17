@@ -1,4 +1,4 @@
-import pygame 
+import pygame
 
 class Menu:
     def __init__(self, x, y):
@@ -13,7 +13,6 @@ class Menu:
     def botoes(self):
         return self.__botoes
 
-    
     @property
     def largura(self):
         return self.__largura
@@ -69,7 +68,21 @@ class Menu:
         if self.titulo_renderizado:
             tela.blit(self.titulo_renderizado, self.posicao_titulo)
 
-    def opcoes_menu(self):
-        if self.botoes:
-            
-   
+    def verifica_click(self, evento):
+        if evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:
+            for i in range(len(self.botoes)):
+                opcao = self.botoes[i]
+                if opcao.rect.collidepoint(evento.pos):  # Verifica se clicou no botão
+                    return i
+        return None           
+
+    def acoes_menu(self, evento):
+        clique = self.verifica_click(evento)
+        if clique is not None:
+            if clique == 0:
+                print("Botão Jogar clicado")
+            elif clique == 1:
+                print("Botão Sair clicado")
+                pygame.quit()
+                exit()
+
