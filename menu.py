@@ -95,13 +95,14 @@ class Menu:
         clique = self.verifica_click(evento)
         if clique is not None:
             if clique == 0:
-                pass
+                print("vamoo")
                  #LUGAR QUE EU CHAMO A FUNÇÃO DO JOGO
             elif clique == 1:
                 jogar = Tela_Jogar(player, bot, fundo, 50, 50)
-                run = True
-                while run:
-                    jogar.tela_fighting(superficie, altura, largura, fonte, fundo) 
+                
+                jogar.tela_fighting(superficie, altura, largura, fonte, fundo) 
+                pygame.mixer.music.set_volume(jogar.volume_mus)
+                pygame.mixer.music.stop()
                 print("Essa ")#LUGAR QUE EU CHAMO A FUNÇÃO DE CONTINUAR O JOGO
             elif clique == 2:
                 print("Botão Ranking clicado") #LUGAR QUE EU CHAMO A FUNÇÃO DO RANKING
@@ -111,9 +112,10 @@ class Menu:
                 print("Botão Sair clicado")  # LUGAR QUE EU CHAMO
                 pygame.quit()    
                 exit()
+    
     def tocar_musica(self, musica):
         pygame.mixer.music.load(musica)
-        pygame.mixer.music.set_volume(0.5)
+        pygame.mixer.music.set_volume(0.2)
         pygame.mixer.music.play(-1)
 
    
