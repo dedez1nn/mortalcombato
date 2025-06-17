@@ -28,7 +28,7 @@ def main():
     player = Jogador("cris_tonaldo", [3, 3, 4, 3, 4, 1, 8, 5], 10, altura - 150)
     player2 = Inimigo("cris_tonaldo", [3, 3, 4, 3, 4, 1, 8, 5], 400, altura - 150)
     clock = pygame.time.Clock()
-    telatest = Tela_Jogar(player, player2, fundo, 50)
+    telatest = Tela_Jogar(player, player2, fundo, 50, 50)
     fase = Fase(player, player2)
 
     while run:
