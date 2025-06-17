@@ -1,5 +1,8 @@
 import pygame
-
+from botoes import Botao
+from jogador import Jogador
+from inimigo import Inimigo
+from tela_jogar import Tela_Jogar
 class Menu:
     def __init__(self, x, y):
         self.__largura = None
@@ -7,7 +10,7 @@ class Menu:
         self.__titulo = None
         self.__posicao_titulo = (x, y)
         self.titulo_renderizado = None  
-        self.__botoes = []  
+        self.__botoes = [] 
 
     @property
     def botoes(self):
@@ -76,13 +79,43 @@ class Menu:
                     return i
         return None           
 
-    def acoes_menu(self, evento):
+    def criar_botao(self):
+        texto_botoes = ["Jogar", "Continuar", "Ranking", "Configuracoes", "Sair"]
+        botoes_criados = []
+
+        for i in range(len(texto_botoes)):
+            texto = texto_botoes[i]
+            pos_botao = Botao(300, 170 + i * 50)
+            pos_botao.titulo_botao("MKX Title.ttf", 35, texto, (255, 255, 0))
+            botoes_criados.append(pos_botao)
+        
+        self.botoes = botoes_criados
+    def acoes_menu(self, player, bot, evento, superficie, altura, largura, fonte, fundo):
+        
         clique = self.verifica_click(evento)
         if clique is not None:
             if clique == 0:
-                print("Botão Jogar clicado")
+                pass
+                 #LUGAR QUE EU CHAMO A FUNÇÃO DO JOGO
             elif clique == 1:
-                print("Botão Sair clicado")
-                pygame.quit()
+                jogar = Tela_Jogar(player, bot, fundo, 50, 50)
+                run = True
+                while run:
+                    jogar.tela_fighting(superficie, altura, largura, fonte, fundo) 
+                print("Essa ")#LUGAR QUE EU CHAMO A FUNÇÃO DE CONTINUAR O JOGO
+            elif clique == 2:
+                print("Botão Ranking clicado") #LUGAR QUE EU CHAMO A FUNÇÃO DO RANKING
+            elif clique == 3:
+                print("Botão Configurações clicado") #LUGAR QUE EU CHAMO
+            elif clique == 4:
+                print("Botão Sair clicado")  # LUGAR QUE EU CHAMO
+                pygame.quit()    
                 exit()
+    def tocar_musica(self, musica):
+        pygame.mixer.music.load(musica)
+        pygame.mixer.music.set_volume(0.5)
+        pygame.mixer.music.play(-1)
 
+   
+
+        
