@@ -70,8 +70,12 @@ class Tela_Jogar:
     @pause.setter
     def pause(self, val: bool):
         self.__pause = val
+        
+    def define_volumes(self, ef: float, mus: float):
+        self.volume_ef = ef
+        self.volume_mus = mus
 
-    def tela_fighting(self, superficie, altura, largura, fonte, fundo):
+    def tela_fighting(self, superficie, altura, largura, fonte, fundo, sorteio):
         rodando = True
         clock = pygame.time.Clock()
 
@@ -85,22 +89,34 @@ class Tela_Jogar:
             texto_round = fonte.render(f"ROUND {self.fase.round}", True, (0, 0, 0))
             superficie.blit(texto_round, (350, 20))
 
-            teclas = pygame.key.get_pressed()
-            if teclas[pygame.K_p]:    
-                self.pause = True
-                tela_congelada = superficie.copy()
-                self.pausa(superficie, fonte, fundo, tela_congelada)
 
             self.player.actions(superficie, altura, largura, self.bot)
-            self.bot.actions(superficie, altura, largura, self.player) 
+            if sorteio == 1:
+                self.bot.actions(superficie, altura, largura, self.player) 
+            else:
+                self.bot.actions_2(superficie, altura, largura, self.player) 
             self.player.barra_vida(superficie, 10, 20)
             self.bot.barra_vida(superficie, 490, 20)
 
-            self.fase.loopmain()
+            self.fase.loop_main()
 
             if self.fase.ganhador != -1:
                 self.acabou = True
                 rodando = False
+                pygame.time.delay(2000)
+                self.fase.reset_fase()
+                return 0
+            
+            teclas = pygame.key.get_pressed()
+            if teclas[pygame.K_p]:
+                if not self.pause: 
+                    self.pause = True
+                    tela_congelada = superficie.copy()
+                    if self.pausa(superficie, fonte, fundo, tela_congelada) == 0:
+                        self.pause = False
+                        self.fase.reset_fase()
+                        pygame.time.delay(200)
+                        return 0
 
             pygame.display.update()
             clock.tick(60)  # 60 FPS para garantir que a tela será atualizada
@@ -115,7 +131,8 @@ class Tela_Jogar:
 
         while self.pause:
             superficie.blit(tela_congelada, (0, 0))  # fundo congelado
-            pegar_y.clear()
+
+            pegar_y = []
             for i in range(3):
                 y = 300 - i * 50
                 pygame.draw.rect(superficie, (255, 255, 255), (300, y, 200, 40))
@@ -136,7 +153,7 @@ class Tela_Jogar:
                         elif ret_selecionado == 1:
                             self.configuracoes(superficie, fonte, fundo, tela_congelada)
                         elif ret_selecionado == 0:  # Sair
-                            sys.exit()
+                            return 0
 
             pygame.draw.rect(superficie, (255, 255, 0), (299, pegar_y[ret_selecionado], 200, 40), 5)
             pygame.display.flip() 
@@ -144,10 +161,10 @@ class Tela_Jogar:
     def configuracoes(self, superficie, fonte, fundo, tela_congelada):
         config = True
         ret_selecionado = 0
-
+        
         while config:
-            razao = [self.volume_ef / 100, self.volume_mus / 100]
             superficie.blit(tela_congelada, (0, 0))
+            razao = [(self.volume_ef)/ 100, (self.volume_mus) / 100]
             texto_bloco_1 = fonte.render("Volume", True, (0, 0, 0))
             texto_bloco_2 = fonte.render("Musica", True, (0, 0, 0))
             texto_bloco_3 = fonte.render("Voltar", True, (0, 0, 0))
@@ -158,7 +175,7 @@ class Tela_Jogar:
                 y = 300 - i * 50
                 pygame.draw.rect(superficie, (255, 255, 255), (300, y, 150, 40))
                 superficie.blit(lista_textos[i], (305, y + 5))
-                pygame.draw.rect(superficie, (255, 255, 255), (500, y, 100 * razao[i], 40))
+                pygame.draw.rect(superficie, (0, 0, 0), (500, y, 100 * razao[i], 40))
                 pegar_y.append(y)
             pygame.draw.rect(superficie, (255, 255, 255), (300, 350, 150, 40))
             superficie.blit(texto_bloco_3, (300, 350))
@@ -187,9 +204,10 @@ class Tela_Jogar:
                     elif event.key == pygame.K_RETURN:
                         if ret_selecionado == 2:
                             config = False
+                            break
 
-            pygame.draw.rect(superficie, (255, 255, 0), (299, pegar_y[ret_selecionado], 150, 40), 5)
-            pygame.display.flip()
+                pygame.draw.rect(superficie, (255, 255, 0), (299, pegar_y[ret_selecionado], 150, 40), 5)
+                pygame.display.flip()
             if self.volume_ef >= 100:
                 self.volume_ef = 100
             elif self.volume_ef <= 0:
@@ -198,3 +216,24 @@ class Tela_Jogar:
                 self.volume_mus = 100
             elif self.volume_mus <= 0:
                 self.volume_mus = 0
+    
+    def game_over(self, superficie, fonte, tela_congelada):
+        rodando = True
+        if self.player.vida <= 0:
+            while rodando:
+                texto_titulo = fonte.render("Game Over", True, (0, 0, 0))
+                texto_bloco_1 = fonte.render("Tentar Novamente", True, (0, 0, 0))
+                texto_bloco_2 = fonte.render("Tentar Novamente", True, (0, 0, 0))
+                lista_textos = [texto_bloco_1, texto_bloco_2]
+                
+                pegar_y = []
+                for i in range(2):
+                    y = 300 - i * 50
+                    pygame.draw.rect(superficie, (255, 255, 255), (300, y, 150, 40))
+                    superficie.blit(lista_textos[i], (305, y + 5))
+                    pegar_y.append(y) 
+                
+                texto_round = fonte.render("GAME OVER!", True, (255, 0, 0))
+                superficie.blit(texto_round, (350, 20))
+                      
+                 
