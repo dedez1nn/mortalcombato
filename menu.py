@@ -3,15 +3,34 @@ from botoes import Botao
 from jogador import Jogador
 from inimigo import Inimigo
 from tela_jogar import Tela_Jogar
+import random
 class Menu:
     def __init__(self, x, y):
-        self.__largura = None
-        self.__altura = None
+        '''self.__largura = None
+        self.__altura = None'''
         self.__titulo = None
         self.__posicao_titulo = (x, y)
         self.titulo_renderizado = None  
         self.__botoes = [] 
+        self.__volume_ef = 0.5
+        self.__volume_mus = 0.5
 
+    @property
+    def volume_ef(self):
+        return self.__volume_ef
+    
+    @property
+    def volume_mus(self):
+        return self.__volume_mus
+    
+    @volume_ef.setter
+    def volume_ef(self, val: float):
+        self.__volume_ef = val
+        
+    @volume_mus.setter
+    def volume_mus(self, val: float):
+        self.__volume_mus = val
+    
     @property
     def botoes(self):
         return self.__botoes
@@ -54,13 +73,13 @@ class Menu:
 
 #------------------------------------------------------
 
-    def tela(self):
+    def tela(self, largura, altura):
         pygame.display.set_caption("Menu")
-        return pygame.display.set_mode((self.largura, self.altura))
+        return pygame.display.set_mode((largura, altura))
     
-    def fundo_tela(self, img):
+    def fundo_tela(self, largura, altura,img):
         fundo = pygame.image.load(img).convert_alpha()
-        fundo = pygame.transform.scale(fundo, (self.largura, self.altura))
+        fundo = pygame.transform.scale(fundo, (largura, altura))
         return fundo
     
     def titulo_menu(self, fonte, tamanho, texto, cor):
@@ -88,8 +107,8 @@ class Menu:
             pos_botao = Botao(300, 170 + i * 50)
             pos_botao.titulo_botao("MKX Title.ttf", 35, texto, (255, 255, 0))
             botoes_criados.append(pos_botao)
-        
         self.botoes = botoes_criados
+
     def acoes_menu(self, player, bot, evento, superficie, altura, largura, fonte, fundo):
         
         clique = self.verifica_click(evento)
@@ -98,11 +117,12 @@ class Menu:
                 print("vamoo")
                  #LUGAR QUE EU CHAMO A FUNÇÃO DO JOGO
             elif clique == 1:
-                jogar = Tela_Jogar(player, bot, fundo, 50, 50)
-                
-                jogar.tela_fighting(superficie, altura, largura, fonte, fundo) 
-                pygame.mixer.music.set_volume(jogar.volume_mus)
-                pygame.mixer.music.stop()
+                jogar = Tela_Jogar(player, bot, fundo, self.volume_ef * 100, self.volume_mus * 100)
+                sorteio = random.randint(1,2)
+                res = jogar.tela_fighting(superficie, altura, largura, fonte, fundo, sorteio)
+                res_pausa = jogar.pausa(superficie, fonte, fundo, res)
+                if res == 0 or res_pausa == 0:
+                    return
                 print("Essa ")#LUGAR QUE EU CHAMO A FUNÇÃO DE CONTINUAR O JOGO
             elif clique == 2:
                 print("Botão Ranking clicado") #LUGAR QUE EU CHAMO A FUNÇÃO DO RANKING
@@ -115,9 +135,7 @@ class Menu:
     
     def tocar_musica(self, musica):
         pygame.mixer.music.load(musica)
-        pygame.mixer.music.set_volume(0.2)
+        pygame.mixer.music.set_volume(0.0)
         pygame.mixer.music.play(-1)
-
-   
-
+         
         
