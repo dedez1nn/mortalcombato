@@ -1,0 +1,68 @@
+import pygame
+
+class TelaInputNome:
+    def __init__(self):
+        self.__nome = ""
+        self.__input_ativo = True  
+
+    @property
+    def nome(self):
+        return self.__nome
+    
+    @nome.setter
+    def nome(self, value: str):
+        self.__nome = value
+
+    @property
+    def input_ativo(self):
+        return self.__input_ativo
+
+    @input_ativo.setter
+    def input_ativo(self, value: bool):
+        self.__input_ativo = value
+
+
+    def desenhar_input(self, tela, fonte):
+        rect_input = pygame.Rect(200, 250, 400, 50)
+        cor = pygame.Color(28, 134, 238)  
+
+        pygame.draw.rect(tela, cor, rect_input, 2)
+
+        texto_instrucao = fonte.render("Digite seu nome:", True, (255, 255, 255))
+        texto_nome = fonte.render(self.nome, True, (255, 255, 0))
+
+        largura_tela = tela.get_width()
+        tela.blit(texto_instrucao, (largura_tela // 2 - texto_instrucao.get_width() // 2, 180))
+        tela.blit(texto_nome, (rect_input.x + 10, rect_input.y + 10))
+
+    def tratar_eventos(self, evento):
+        if evento.type == pygame.KEYDOWN and self.input_ativo:
+            if evento.key == pygame.K_RETURN and self.nome.strip() != "":
+                return "finalizar"
+            elif evento.key == pygame.K_BACKSPACE:
+                self.nome = self.nome[:-1]
+            else:
+                self.nome += evento.unicode
+        return None
+
+    def exibir(self, tela):
+        clock = pygame.time.Clock()
+        fonte = pygame.font.Font(None, 50)
+        rodando = True
+
+        while rodando:
+            for evento in pygame.event.get():
+                if evento.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+
+                acao = self.tratar_eventos(evento)
+                if acao == "finalizar":
+                    rodando = False
+
+            tela.fill((0, 0, 0))
+            self.desenhar_input(tela, fonte)
+            pygame.display.flip()
+            clock.tick(60)
+
+        return self.nome
