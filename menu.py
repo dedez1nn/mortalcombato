@@ -4,17 +4,26 @@ from jogador import Jogador
 from inimigo import Inimigo
 from tela_jogar import Tela_Jogar
 import random
+from tela_select import Tela_Select
 class Menu:
-    def __init__(self, x, y):
-        '''self.__largura = None
-        self.__altura = None'''
+    def __init__(self, x, y, lista_personagens: list, lista_mini: list, lista_default: list, lista_sons_select: list, som_hit, lista_n_sprites: list):
         self.__titulo = None
         self.__posicao_titulo = (x, y)
-        self.titulo_renderizado = None  
+        self.titulo_renderizado = None
+        self.__listas_select = [lista_personagens, lista_mini, lista_default, lista_sons_select, lista_n_sprites]
+        #0 = tonaldo, 1 = africa, 2 = ferro, 3 = nessi
         self.__botoes = [] 
         self.__volume_ef = 0.5
         self.__volume_mus = 0.5
-
+    
+    @property
+    def listas_select(self):
+        return self.__listas_select
+    
+    @listas_select.setter
+    def listas_select(self, val: list):
+        self.__listas_select = val
+    
     @property
     def volume_ef(self):
         return self.__volume_ef
@@ -109,7 +118,7 @@ class Menu:
             botoes_criados.append(pos_botao)
         self.botoes = botoes_criados
 
-    def acoes_menu(self, player, bot, evento, superficie, altura, largura, fonte, fundo):
+    def acoes_menu(self, evento, superficie, altura, largura, fonte, fundo):
         
         clique = self.verifica_click(evento)
         if clique is not None:
@@ -117,12 +126,31 @@ class Menu:
                 print("vamoo")
                  #LUGAR QUE EU CHAMO A FUNÇÃO DO JOGO
             elif clique == 1:
+                
+                select = Tela_Select(self.listas_select[0], self.listas_select[1], self.listas_select[2], self.listas_select[3], self.volume_ef, self.volume_mus)
+                res = select.exibir(superficie, fonte, fundo)
+                nome = self.listas_select[0][res]
+                tam_sprites = self.listas_select[4][res] 
+                pygame.mixer.music.stop()
+                self.volume_ef = select.volume_ef
+                self.volume_mus = select.volume_mus
+                player = Jogador(nome, tam_sprites, 10, altura - 150)
+                #rand aqui em baixo
+                sorteio = random.randint(0,3)
+                nome_bot = self.listas_select[0][sorteio]
+                sprites_bot = self.listas_select[4][sorteio]
+                bot = Inimigo(nome_bot, sprites_bot, 400, altura - 150)
+                
+                
+                
                 jogar = Tela_Jogar(player, bot, fundo, self.volume_ef * 100, self.volume_mus * 100)
                 sorteio = random.randint(1,2)
                 res = jogar.tela_fighting(superficie, altura, largura, fonte, fundo, sorteio)
                 res_pausa = jogar.pausa(superficie, fonte, fundo, res)
                 if res == 0 or res_pausa == 0:
                     return
+                self.volume_ef = jogar.volume_ef
+                self.volume_mus = jogar.volume_mus
                 print("Essa ")#LUGAR QUE EU CHAMO A FUNÇÃO DE CONTINUAR O JOGO
             elif clique == 2:
                 print("Botão Ranking clicado") #LUGAR QUE EU CHAMO A FUNÇÃO DO RANKING
@@ -135,7 +163,7 @@ class Menu:
     
     def tocar_musica(self, musica):
         pygame.mixer.music.load(musica)
-        pygame.mixer.music.set_volume(0.0)
+        pygame.mixer.music.set_volume(self.volume_mus)
         pygame.mixer.music.play(-1)
          
         
