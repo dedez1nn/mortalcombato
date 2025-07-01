@@ -26,10 +26,10 @@ class Tela_Ranking:
 
     def cria_botoes_ranking(self, fonte, fonte_titulo):
         titulo_ranking = Botao(300, 55)
-        voltar_ranking = Botao(620, 500)
+        voltar_ranking = Botao(570, 500)
 
-        titulo_ranking.titulo_botao(fonte_titulo, "Ranking", (0, 0, 0))
-        voltar_ranking.titulo_botao(fonte, "Voltar", (255, 0, 0))
+        titulo_ranking.titulo_botao(fonte_titulo, "Ranking", (255, 0, 0))
+        voltar_ranking.titulo_botao(fonte, "Voltar", (255, 255, 255))
 
         return [titulo_ranking, voltar_ranking]
     
@@ -44,8 +44,8 @@ class Tela_Ranking:
 
         # Renderiza o ranking na tela
         for i, jogador in enumerate(jogadores):
-            texto = fonte.render(str(jogador), True, (255, 255, 255))  # Desenha o texto
-            superficie.blit(texto, (100, 150 + i * 40))  # Ajuste de posição (espacamento)
+            texto = fonte.render(str(jogador), True, (0, 255, 0))  # Desenha o texto
+            superficie.blit(texto, (170, 190 + i * 45))  # Ajuste de posição (espacamento)
 
     def ranking(self, superficie, fonte, fonte_titulo):
         # Carrega o fundo
