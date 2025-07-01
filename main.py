@@ -83,6 +83,7 @@ def main():
                 res = select.exibir(tela, fonte, fundo)
                 nome = lista_personagens[res]
                 tam_sprites = lista_n_sprites[res]
+                menu.tocar_musica("MusicaBatalha.mp3")
                 menu.volume_ef = select.volume_ef
                 menu.volume_mus = select.volume_mus
 
@@ -107,7 +108,7 @@ def main():
                     pontos, sequencia = jogar.fase.get_dados_finais()                
                     manager_ranking = ManagerRanking()
                     manager_ranking.carrega_arquivo("ranking.json")
-                    manager_ranking.add_jogador(JogadorRanking(nomejogador, pontos, sequencia))
+                    manager_ranking.atualizar_ou_adicionar(JogadorRanking(nomejogador, pontos, sequencia))
                     manager_ranking.salvar_ranking("ranking.json")
                     break
 
