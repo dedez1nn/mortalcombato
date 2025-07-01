@@ -2,15 +2,31 @@ import pygame
 from inimigo import Inimigo
 from jogador import Jogador
 
-# 1 comentario
-
 class Fase:
     def __init__(self, player: Jogador, inimigo: Inimigo):
         self.__round = 1
         self.__objplayer = player
         self.__objbot = inimigo
-        self.__rounds_ganhos = [0, 0] #[0] player, [1] bot
-        self.__ganhador = -1 #ninguem
+        self.__rounds_ganhos = [0, 0]  # [0] player, [1] bot
+        self.__ganhador = -1  # ninguém
+        self.__streak = 0
+        self.__pontos = 0
+
+    @property
+    def pontos(self):
+        return self.__pontos
+    
+    @pontos.setter
+    def pontos(self, val: int):
+        self.__pontos = val
+
+    @property
+    def streak(self):
+        return self.__streak
+    
+    @streak.setter
+    def streak(self, val: int):
+        self.__streak = val
         
     @property
     def ganhador(self):
@@ -19,7 +35,6 @@ class Fase:
     @ganhador.setter
     def ganhador(self, val: int):
         self.__ganhador = val
-    
     
     @property
     def rounds_ganhos(self):
@@ -66,18 +81,23 @@ class Fase:
         else:
             if self.rounds_ganhos[0] > self.rounds_ganhos[1]:
                 self.ganhador = 0
+                self.pontos += 300
+                self.streak += 1
             else:
                 self.ganhador = 1
+                self.pontos -= 50
+                self.streak = 0
             self.reset_atributos()
             print(f"Ganhador: {self.ganhador}")
+            print(f"Streak: {self.streak}")
+            print(f"Pontos: {self.pontos}")
             self.reset_fase()
-            
-            #conectar com progresso, tela de seleção de fase aqui:
-            
-            
-            
-        
+    
+    def get_dados_finais(self):
+            return self.pontos, self.streak
+
     def reset_atributos(self):
+        # Resetando os atributos dos personagens
         self.objplayer.estados.resetar_todos()
         self.objbot.estados.resetar_todos()
         self.objplayer.vida = 100
@@ -91,8 +111,7 @@ class Fase:
         pygame.time.delay(1000)
         
     def reset_fase(self):
+        # Resetando a fase após o fim do round
         self.round = 1
         self.rounds_ganhos = [0, 0]
         self.__ganhador = -1
-            
-            
