@@ -30,66 +30,12 @@ class Botao:
     def titulo_renderizado(self, valor):
         self.__titulo_renderizado = valor
 
-    def titulo_botao(self, fonte, tamanho, texto, cor):
-        fonte_render = pygame.font.Font(fonte, tamanho)
-        self.titulo_renderizado = fonte_render.render(texto, True, cor)
+    def titulo_botao(self, fonte, texto, cor):
+
+        self.titulo_renderizado = fonte.render(texto, True, cor)
         self.rect = self.titulo_renderizado.get_rect(topleft=self.posicao_botao)
 
-    def desenha_botao(self, tela):
+    def render_botao(self, tela):
         if self.titulo_renderizado:
             tela.blit(self.titulo_renderizado, self.posicao_botao)
-
-
-
-
-
-
-import pygame
-from menu import Menu
-import sys
-from botoes import Botao
-
-def main():
-    pygame.init()
     
-    menu = Menu(245, 55)
-    menu.largura = 800
-    menu.altura = 600
-    tela = menu.tela()
-    fundo = menu.fundo_tela("fundo/1.png")  
-    menu.titulo_menu("MKX Title.ttf", 50, "Mortal Kombat", (0, 0, 0))  
-    
-    botao1 = Botao(300, 200)
-    botao1.titulo_botao("MKX Title.ttf", 30, "Jogar", (255, 255, 0))
-
-    botao2 = Botao(300, 300)
-    botao2.titulo_botao("MKX Title.ttf", 30, "Sair", (255, 255, 0))
-    
-    menu.botoes = [botao1, botao2] 
-
-    run = True
-    clock = pygame.time.Clock()
-    
-    while run:
-        clock.tick(60)
-
-        for evento in pygame.event.get():
-            if evento.type == pygame.QUIT:
-                run = False
-                pygame.quit()
-                sys.exit()
-
-            menu.acoes_menu(evento)  # Verifica o clique a cada evento
-            
-        tela.blit(fundo, (0, 0))  
-        menu.desenha_titulo_menu(tela)
-        for botao in menu.botoes:
-            botao.desenha_botao(tela)
-
-        pygame.display.flip()  # Atualiza a tela
-    
-    pygame.quit()
-
-if __name__ == "__main__":
-    main()
-
