@@ -2,18 +2,28 @@ from jogador import Jogador
 from inimigo import Inimigo
 import pygame, sys
 from fase import Fase
+from elem_independente import Elem_Independente
 
 
 class Tela_Jogar:
-    def __init__(self, player: Jogador, bot: Inimigo, fundo: str, volume_ef: int, volume_mus: int):
+    def __init__(self, player: Jogador, bot: Inimigo, fundo: str, volume_ef: int, volume_mus: int, elem_ind: Elem_Independente):
         self.__player = player
         self.__bot = bot
         self.__fundo = fundo
         self.__volume_ef = volume_ef
         self.__volume_mus = volume_mus
         self.__pause = False
+        self.__elems = elem_ind
         self.__fase = Fase(player, bot)
         self.acabou = False
+    
+    @property
+    def elems(self):
+        return self.__elems
+    
+    @elems.setter
+    def elems(self, val: Elem_Independente):
+        self.__elems = val
     
     @property
     def fase(self):
@@ -75,7 +85,7 @@ class Tela_Jogar:
         self.volume_ef = ef
         self.volume_mus = mus
 
-    def tela_fighting(self, superficie, altura, largura, fonte, fundo, sorteio):
+    def tela_fighting(self, superficie, altura, largura, fonte, fundo, sorteio, nuvem):
         rodando = True
         clock = pygame.time.Clock()
 
@@ -100,12 +110,17 @@ class Tela_Jogar:
 
             self.fase.loop_main()
 
-            if self.fase.ganhador != -1:
-                self.acabou = True
-                rodando = False
-                pygame.time.delay(2000)
+            if self.fase.ganhador != 1:
+                if self.fase.ganhador == 0:
+                    self.player.pontos += 300
+                    self.player.streak += 1
+                else:
+                    if self.player.pontos > 300:
+                        self.player.pontos -= 300
+                        self.player.streak = 0
                 self.fase.reset_fase()
                 return 0
+                
             
             teclas = pygame.key.get_pressed()
             if teclas[pygame.K_p]:
@@ -219,7 +234,8 @@ class Tela_Jogar:
     
     def game_over(self, superficie, fonte, tela_congelada):
         rodando = True
-        if self.player.vida <= 0:
+            
+        if rodando:
             while rodando:
                 texto_titulo = fonte.render("Game Over", True, (0, 0, 0))
                 texto_bloco_1 = fonte.render("Tentar Novamente", True, (0, 0, 0))
